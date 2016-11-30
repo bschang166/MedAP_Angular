@@ -1,0 +1,189 @@
+'use strict';
+
+import { LibraryModule } from './library.module';
+
+describe('Library component', () => {
+
+  beforeEach(angular.mock.module(LibraryModule));
+
+  let LibraryService;
+// ---------- Unit Tests -------------------------------------------------------
+  describe('unit tests', () => {
+    let scope;
+    let element;
+    let ctrl;
+    let deferred;
+
+    beforeEach(inject(($rootScope, _$q_, $compile, _LibraryService_) => {
+      deferred = _$q_.defer();
+
+      LibraryService = _LibraryService_;
+      spyOn(LibraryService, 'retrieveBooks').and.returnValue(deferred.promise);
+
+      scope = $rootScope.$new();
+      element = $compile('<library></library>')(scope);
+      ctrl = element.controller('library');
+    }));
+
+  });
+
+
+// ---------- Shallow Unit Tests ------------------------------------------------
+  describe('shallow tests', () => {
+    let $componentController;
+    let scope;
+    let element;
+    let ctrl;
+
+    let deferred;
+
+    beforeEach(inject(($rootScope, _$componentController_, _$q_, $compile) => {
+      deferred = _$q_.defer();
+
+      LibraryService = {
+        retrieveBooks: function(){},
+      }
+
+      scope = $rootScope.$new();
+      $componentController = _$componentController_;
+
+      ctrl = $componentController('library', {
+        $scope: scope,
+        LibraryService: LibraryService
+      }, {});
+
+    }));
+
+    describe('on init', () => {
+      it('should retrieve books with default book sort attr', () => {
+        spyOn(LibraryService, 'retrieveBooks').and.returnValue(deferred.promise);
+        ctrl.bookSortAttrs = [{name: 'defaultSortBy'}];
+
+        ctrl.$onInit();
+
+        expect(LibraryService.retrieveBooks).toHaveBeenCalledWith({sortBy: 'defaultSortBy'});
+      });
+
+      it('should load books with set date formatter on service', () => {
+        spyOn(LibraryService, 'retrieveBooks').and.returnValue(deferred.promise);
+        spyOn(LibraryService, 'dateFormatter').and.returnValue('testDate');
+        let books = [newBook()];
+        deferred.resolve(books);
+
+        ctrl.$onInit();
+        scope.$digest();
+
+        expect(ctrl.filteredBooks[0].pubDate).toEqual('testDate');
+      });
+
+      it('should load books with title transformed', () => {
+        spyOn(LibraryService, 'retrieveBooks').and.returnValue(deferred.promise);
+        let books = [newBook('title')];
+        deferred.resolve(books);
+
+        ctrl.isUppercaseTitle = true;
+        ctrl.$onInit();
+        scope.$digest();
+
+        expect(ctrl.filteredBooks[0].title).toEqual('TITLE');
+
+        ctrl.isUppercaseTitle = false;
+        ctrl.$onInit();
+        scope.$digest();
+
+        expect(ctrl.filteredBooks[0].title).toEqual('Title');
+      });
+
+    });
+
+
+    describe('drag and drop', () => {
+      let testBooks;
+      let target = newBook('title', 'author', 'date');
+      beforeEach(() => {
+        testBooks = [newBook(), newBook(), newBook()];
+      });
+
+      it('should move book from top to bottom', () => {
+        let books = [
+          target,
+          ...testBooks,
+        ];
+        ctrl.filteredBooks = books;
+
+        ctrl.onDropBook({}, {model: books, dragIndex: 0,dropIndex: books.length - 1});
+
+        let expected = [
+          ...testBooks,
+          target,
+        ];
+
+        expect(ctrl.filteredBooks).toEqual(expected);
+      });
+
+      it('should move book from bottom to top', () => {
+        let books = [
+          ...testBooks,
+          target,
+        ];
+        ctrl.filteredBooks = books;
+
+        ctrl.onDropBook({}, {model: books, dragIndex: books.length - 1, dropIndex: 0});
+
+        let expected = [
+          target,
+          ...testBooks,
+        ];
+        expect(ctrl.filteredBooks).toEqual(expected);
+      });
+
+
+      it('should move book from middle to top', () => {
+        let books = [
+          ...testBooks,
+          target,
+          ...testBooks,
+        ];
+        ctrl.filteredBooks = books;
+
+        ctrl.onDropBook({}, {model: books, dragIndex: testBooks.length, dropIndex: 0});
+
+        let expected = [
+          target,
+          ...testBooks,
+          ...testBooks,
+        ];
+        expect(ctrl.filteredBooks).toEqual(expected);
+      });
+
+      it('should move book from middle to bottom', () => {
+        let books = [
+          ...testBooks,
+          target,
+          ...testBooks,
+        ];
+        ctrl.filteredBooks = books;
+
+        ctrl.onDropBook({}, {model: books, dragIndex: testBooks.length, dropIndex: books.length - 1});
+
+        let expected = [
+          ...testBooks,
+          ...testBooks,
+          target,
+        ];
+        expect(ctrl.filteredBooks).toEqual(expected);
+      });
+
+    });
+
+  });
+
+  function newBook(title='', author='', pubDate=new Date()) {
+    return {
+      title,
+      author,
+      pubDate
+    };
+  }
+
+});

@@ -1,0 +1,7 @@
+[
+    {"title": "AngularJS", "author": "Google", "pubDate": [2010, 1, 5] },
+    {"title": "ReactJS", "author": "Facebook", "pubDate": [2013, 3, 2] },
+    {"title": "EmberJS", "author": "TILDE INC", "pubDate": [2011, 12, 8] },
+    {"title": "Elm", "author": "Evan Czaplicki", "pubDate":  [2012, 5, 15]},
+    {"title": "VueJS", "author": "Evan You", "pubDate": [2014, 2, 27] }
+]

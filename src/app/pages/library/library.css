@@ -1,0 +1,69 @@
+section.library-searchbar {
+  margin: auto;
+  max-width: 1200px;
+
+  margin-bottom: 30px;
+}
+
+section.library-mainContent {
+  margin: 50px auto;
+  display: flex;
+  max-width: 1200px;
+
+  padding: 50px;
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+section.library-addBook {
+  flex: 1 1 35%;
+
+  max-height: 450px;
+  padding: 50px;
+  background-color: #f7f7f9;
+}
+
+.library-addBook .library-formGroup {
+  margin-left: 0px;
+  margin-right: 0px;
+} 
+
+section.library-bookCase {
+  flex: 1 1 60%;
+  padding-right: 40px;  
+}
+
+section.library-criteria {
+  margin: auto;
+  max-width: 800px;
+}
+
+.library-bookSorter {
+  display: block;
+  margin: 15px 0px;
+}
+
+section.library-books {
+  margin: auto;
+  max-width: 800px;
+}
+
+.library-bookList {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+.draggable-active .library-bookList-book {
+  opacity: 0.2;
+}
+
+.library-bookList-book {
+  /*position: relative;*/
+  /*display: block;*/
+  padding: 10px 15px;
+  margin-bottom: -1px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}

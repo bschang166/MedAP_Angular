@@ -1,0 +1,82 @@
+
+<section class="library-searchbar">
+  <typeahead display-records="$ctrl.searchResults" change-interval="$ctrl.searchbarInterval" on-change="$ctrl.onBookSearch($event)"></typeahead>
+</section>
+
+<section class="library-mainContent">
+
+  <section class="library-bookCase">
+    <section class="library-criteria">
+      <div class="library-bookSorter">
+        <label>Sort by: </label>
+        <select ng-model="$ctrl.sortBy" ng-change="$ctrl.onBookSort($ctrl.sortBy)">
+          <option ng-repeat="attr in ::$ctrl.bookSortAttrs" value="{{attr.name}}"> {{ attr.label }} </option>
+        </select>
+      </div>
+
+      <input type="checkbox" ng-model="$ctrl.isUppercaseTitle" ng-change="$ctrl.onToggleUppercase($ctrl.isUppercaseTitle)" />
+      <label>Uppercase book titles</label>
+    </section>
+
+    <section class="library-books">
+      <ul class="library-bookList" med-on-drop="$ctrl.onDropBook($event, $data)" med-draggable-model="$ctrl.filteredBooks">
+        <li ng-repeat="book in $ctrl.filteredBooks track by $index">
+          <div class="library-bookList-book">
+            <h3> {{ book.title }} </h3>
+            <h4> {{ book.author }} </h4>
+            <h4> {{ book.pubDate }} </h4>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </section>
+
+  <section class="library-addBook">
+    <form name="addBookForm" class="form-horizontal" novalidate
+       ng-model-options="{ updateOn: 'blur' }">
+
+      <div class="library-formGroup form-group"
+        ng-class="{
+          'has-success': addBookForm.title.$dirty && addBookForm.title.$valid,
+          'has-error': (addBookForm.title.$dirty || addBookForm.$submitted) && addBookForm.title.$invalid
+        }">
+        
+        <label>Title: </label>
+        <input type="text" name="title" class="form-control" ng-model="$ctrl.bookToAdd.title" required/>
+        <span class="help-block" ng-if="(addBookForm.title.$dirty || addBookForm.$submitted) && addBookForm.title.$invalid">
+          Please provide a book title.
+        </span>
+      </div>
+
+      <div class="library-formGroup form-group"
+        ng-class="{
+          'has-success': addBookForm.author.$dirty && addBookForm.author.$valid,
+          'has-error': (addBookForm.author.$dirty || addBookForm.$submitted) && addBookForm.author.$invalid
+        }">
+        
+        <label>Author: </label>
+        <input type="text" name="author" class="form-control" ng-model="$ctrl.bookToAdd.author" required/>
+        <span class="help-block" ng-if="(addBookForm.author.$dirty || addBookForm.$submitted) && addBookForm.author.$invalid">
+          Please provide a book author.
+        </span>
+      </div>
+
+      <div class="library-formGroup form-group"
+        ng-class="{
+          'has-success': addBookForm.pubDate.$dirty && addBookForm.pubDate.$valid,
+          'has-error': addBookForm.pubDate.$dirty && addBookForm.pubDate.$invalid
+        }">
+        
+        <label>Published Date: </label>
+        <input type="date" name="pubDate" class="form-control" ng-model="$ctrl.bookToAdd.pubDate" required/>
+        <span class="help-block" ng-if="(addBookForm.pubDate.$dirty || addBookForm.$submitted) && addBookForm.pubDate.$invalid">
+          Please provide a published date.
+        </span>
+      </div>
+
+      <button class="btn btn-primary" ng-click="$ctrl.addBook($ctrl.bookToAdd)">Add Book</button>
+    </form>
+  </section>
+
+</section>
+

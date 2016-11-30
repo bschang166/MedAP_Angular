@@ -1,0 +1,39 @@
+.med-navBar {
+  width: 100%;
+  height: 100%;
+
+  background-color: #222;
+  text-align: center;
+}
+
+.med-navBar ul {
+  list-style: none;
+  height: 100%;
+
+  margin: 0px;
+}
+
+.med-navBar li {
+  display: inline-block;
+  height: 100%;
+}
+
+.med-navBar a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  padding: 20px 30px;
+  font-size: 16px;
+
+  cursor: pointer;
+  transition: 0.2s color ease,0.2s background ease;
+}
+
+.med-navBar a:hover {
+  text-decoration: none;
+  color: #999;
+}
+
+.med-navBar a.active {
+  /*color: #e0dd8d;*/
+}

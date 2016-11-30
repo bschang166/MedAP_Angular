@@ -1,0 +1,7 @@
+<nav class="med-navBar nav">
+  <ul>
+    <li ng-repeat="link in $ctrl.links" >
+      <a ui-sref="{{link.sref}}" ui-sref-active="active" > {{ link.title }} </a>
+    </li>
+  </ul>
+</nav>

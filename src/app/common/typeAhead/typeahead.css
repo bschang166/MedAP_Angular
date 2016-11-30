@@ -1,0 +1,33 @@
+.med-typeahead {
+  position: relative;
+}
+
+.med-typeahead input {
+  width: 100%;
+  padding: 10px 15px;
+}
+
+.med-typeahead ul {
+  list-style: none;
+  padding: 0px;
+
+  position: absolute;
+  z-index: 99;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: scroll;
+  background: #fff;
+}
+
+.med-typeahead ul li a {
+  display: block;
+  padding: 15px;
+  color: #444;
+  background-color: #fff;
+  text-decoration: none;
+}
+
+.med-typeahead ul li a:hover {
+  background-color: #f5f5f5;
+}
