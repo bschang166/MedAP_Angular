@@ -38,7 +38,7 @@ export class LibraryService {
           return {
             title,
             author,
-            pubDate: new Date(pubDate)
+            pubDate: new Date(pubDate[0], pubDate[1]-1, pubDate[2])
           };
         });
       })

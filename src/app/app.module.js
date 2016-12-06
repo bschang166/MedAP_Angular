@@ -1,6 +1,7 @@
 import angular from 'angular';
 import uiRouter from 'angular-ui-router';
 import rx from 'rx-angular';
+import "babel-polyfill";
 
 import { CommonModule } from './common/app.common.module';
 import { DirectivesModule } from './directives/app.directives.module';
