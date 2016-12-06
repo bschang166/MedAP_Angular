@@ -68,7 +68,7 @@
         }">
         
         <label>Published Date: </label>
-        <input type="date" name="pubDate" class="form-control" ng-model="$ctrl.bookToAdd.pubDate" required/>
+        <input type="date" name="pubDate" class="form-control" placeholder="yyyy-MM-dd" ng-model="$ctrl.bookToAdd.pubDate" required/>
         <span class="help-block" ng-if="(addBookForm.pubDate.$dirty || addBookForm.$submitted) && addBookForm.pubDate.$invalid">
           Please provide a published date.
         </span>
