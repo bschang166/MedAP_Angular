@@ -10,6 +10,7 @@
       <div class="library-bookSorter">
         <label>Sort by: </label>
         <select ng-model="$ctrl.sortBy" ng-change="$ctrl.onBookSort($ctrl.sortBy)">
+          <option ng-if="$ctrl.sortBy === ''" value=""></option>
           <option ng-repeat="attr in ::$ctrl.bookSortAttrs" value="{{attr.name}}"> {{ attr.label }} </option>
         </select>
       </div>

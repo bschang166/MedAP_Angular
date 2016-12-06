@@ -105,6 +105,8 @@ class LibraryController {
       this.filteredBooks.splice(dragIndex, 1);
     }
     this.filteredBooks.splice(dropIndex, 0, droppedBook);
+
+    this.sortBy = '';
   }
 
 }
