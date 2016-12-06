@@ -35,5 +35,11 @@ export const AppModule = angular
       $rootScope.$pageFinishedLoading = true;
     });
   })
+  .config(($stateProvider, $urlRouterProvider) => {
+    'ngInject';
+    $urlRouterProvider.when('', ($state) => {
+      $state.go('pages');
+    });
+  })
   .component('medApp', AppComponent)
   .name;
