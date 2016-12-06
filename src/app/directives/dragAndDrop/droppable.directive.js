@@ -18,6 +18,9 @@ class Droppable {
 
     let dragoverIndex;
     $element.on('dragenter', (event) => {
+      // needed on IE for dragover to fire
+      event.preventDefault();
+
       let target = angular.element(event.target);
       while (target[0] !== $element[0]) {
         let parent = target.parent();
