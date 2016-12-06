@@ -33,7 +33,8 @@ class Draggable {
         }
         target = target.parent();
       }
-      this.dragAndDropService.startDrag(model, target);
+      
+      this.dragAndDropService.startDrag(event, model, target);
     });
 
     $element.on('dragend', (event) => {

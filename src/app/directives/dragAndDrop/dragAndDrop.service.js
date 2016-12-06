@@ -28,8 +28,11 @@ export class DragAndDropService {
     onDrop(dragData);
   }
 
-  startDrag(dragModel, dragTargetElm) {
+  startDrag(event, dragModel, dragTargetElm) {
     this.reset();
+    
+    // for FF, dataTransfer must have data to be draggable
+    event.dataTransfer.setData('text', 'data');
 
     this.dragModel = dragModel;
     this.initialIndex = this.domIndexOf(dragTargetElm);
@@ -37,7 +40,7 @@ export class DragAndDropService {
     this.dragTarget = angular.element(dragTargetElm);
     this.dragTarget.addClass('draggable-active');
 
-    this.placeholderElm = this.$window.document.createComment('');
+    this.placeholderElm = angular.element(this.$window.document.createComment(''));
     this.dragTarget.after(this.placeholderElm);
   }
 
