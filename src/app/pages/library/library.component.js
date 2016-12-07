@@ -25,7 +25,6 @@ class LibraryController {
       { label: 'Published Date', name: 'pubDate' },
     ];
 
-    this.searchbarInterval = 300;
     this.isUppercaseTitle = false;
   }
 
@@ -65,9 +64,7 @@ class LibraryController {
 
   onBookSearch(event) {
     if (event.term === '') {
-      this.$scope.$apply(() => {
-        this.searchResults = [];
-      });
+      this.searchResults = [];
       return;
     }
 

@@ -1,7 +1,9 @@
 
 <div class="med-typeahead">
   <input type="text" placeholder="Search..." 
-    ng-model="$ctrl.searchTerm" ng-change="$ctrl.search($ctrl.searchTerm)" ng-focus="$ctrl.onFocus()" ng-blur="$ctrl.onBlur()"/>
+    ng-model="$ctrl.searchTerm" ng-model-options="{debounce: 300}"
+    ng-change="$ctrl.search($ctrl.searchTerm)" 
+    ng-focus="$ctrl.onFocus()" ng-blur="$ctrl.onBlur()"/>
   <ul ng-if="$ctrl.showRecords">
     <li ng-if="$ctrl.displayRecords.length === 0"><a>Empty list</a></li>
     <li ng-repeat="record in $ctrl.displayRecords">
