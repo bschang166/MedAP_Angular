@@ -5,82 +5,146 @@ export class DragAndDropService {
   constructor($rootScope, $timeout, $document, $window) {
     'ngInject';
     this.$document = $document;
+    this.$timeout = $timeout;
     this.$window = $window;
     this.$rootScope = $rootScope;
+
+    this.DND_TYPES = ['move', 'copy'];
   }
 
   reset() {
+    this.isDragging = false;
+
+    this.dndType = null;
     this.dragModel = null;
+    this.dragIndex = null;
     this.dragTarget = null;
-    this.initialIndex = null;
     this.placeholderElm = null;
   }
 
-  handleDrop(event, dropContainer, onDrop) {
-    dropContainer = angular.element(dropContainer);
-    
-    let dragData = {
-      model: this.dragModel,
-      dragIndex: this.initialIndex,
-      dropIndex: this.domIndexOf(this.dragTarget)
-    };
+  handleDrop(event, dropContainer, dropModel, cb) {
+    if (!this.isDragging || this.dragTarget && this.dragTarget.parentNode !== dropContainer) {
+      return;
+    }
 
-    onDrop(dragData);
+    let dragIndex = this.dragIndex;
+    let dropIndex = this.domIndexOf(this.dragTarget);
+    let dragModel = this.dragModel;
+    if (this.dndType === 'move') {
+      let dragItem = dragModel.splice(dragIndex, 1)[0];
+      dropModel.splice(dropIndex, 0, dragItem);
+    } else {
+      dropModel.splice(dropIndex, 0, angular.copy(dragModel[dragIndex]));
+    }
+
+    cb({
+      $event: {
+        dragIndex,
+        dropIndex,
+        dragModel,
+        dropModel,
+      }
+    });
   }
 
-  startDrag(event, dragModel, dragTargetElm) {
+  startDrag(event, targetElm, sourceModel, dndType) {
+    if (this.DND_TYPES.indexOf(dndType) < 0) {
+      throw new Error(`dndType '${dndType}' is not supported!`);
+    }
+
     this.reset();
     
+    this.isDragging = true;
+    
+    this.dndType = dndType;
+    this.dragModel = sourceModel;
+    this.dragIndex = this.domIndexOf(targetElm);
+
+    let target = angular.element(targetElm);
+    if (this.dndType === 'move') {
+      // insert placeholder element for if drag target dom position need to be reverted after later move
+      this.placeholderElm = this.$window.document.createComment('');
+      target.after(this.placeholderElm);
+      this.dragTarget = target[0];
+    } else {
+      this.dragTarget = target.clone()[0];
+    }
+
+    angular.element(this.dragTarget).addClass('med-dnd-drag-active');
+
     // for FF, dataTransfer must have data to be draggable
-    event.dataTransfer.setData('text', 'data');
-
-    this.dragModel = dragModel;
-    this.initialIndex = this.domIndexOf(dragTargetElm);
-
-    this.dragTarget = angular.element(dragTargetElm);
-    this.dragTarget.addClass('draggable-active');
-
-    this.placeholderElm = angular.element(this.$window.document.createComment(''));
-    this.dragTarget.after(this.placeholderElm);
+    event.dataTransfer.setData('Text', 'data');
   }
 
   endDrag() {
+    if (!this.isDragging) return;
+
     this.$rootScope.$applyAsync(() => {
-      this.dragTarget.removeClass('draggable-active');
-      this.placeholderElm.replaceWith(this.dragTarget[0]);
+      // dragged element must be moved back to its original dom position to avoid issue with Angular internal (such as ng-repeat)
+      if (this.dndType === 'move') {
+        angular.element(this.placeholderElm).replaceWith(this.dragTarget);
+        angular.element(this.dragTarget).removeClass('med-dnd-drag-active');
+      } else {
+        angular.element(this.dragTarget).remove();
+      }
       this.reset();
     })
   }
 
-  moveDragTarget(event, dropContainer, dragoverIndex) {
-    dropContainer = angular.element(dropContainer);
-    let dragoverChild = angular.element(dropContainer.children()[dragoverIndex]);
-    if ((dragoverChild[0] && this.dragTarget[0] === dragoverChild[0])) {
+  handleDragover(event, dragoverElm) {
+    if (!this.isDragging || dragoverElm === this.dragTarget) {
       return;
     }
 
-    event.dataTransfer.dropEffect = 'move';
+    if (this.dndType === 'move') {
+      event.dataTransfer.dropEffect = 'move';
+    } else {
+      event.dataTransfer.dropEffect = 'copy'; 
+    }
 
-    if (this.isDropWithinElmContainer(event, dropContainer)) {
-      if (!dragoverChild[0]) {
-        dropContainer.append(this.dragTarget);
-        return;
-      } 
-      // else check if pointer is above/below dragoverChildElm vertical midline
-      let point = this.getDropPoint(event);
-      let elmPos = this.offset(dragoverChild);
-      let vertMidline = elmPos.top + (elmPos.height / 2);
-      if (point.y < vertMidline) {
-        dropContainer[0].insertBefore(this.dragTarget[0], dragoverChild[0]);
-      } else {
-        dragoverChild.after(this.dragTarget);
-      }
+    this.moveDragTarget(event, dragoverElm);
+  }
+
+  moveDragTarget(event, dragoverElm) {
+    this.moveElmToTarget(event, this.dragTarget, dragoverElm);
+  }   
+
+  moveElmToTarget(event, elm, target) {
+    // check if pointer is above/below target vertical midline, and move elm accordingly
+    let point = this.getDropPoint(event);
+    let targetPos = this.offset(target);
+    let vertMidline = targetPos.top + (targetPos.height / 2);
+    if (point.y < vertMidline) {
+      target.parentNode.insertBefore(elm, target);
+    } else {
+      target.parentNode.insertBefore(elm, target.nextElementSibling);
     }
   }
 
+  getDropPoint(event) {
+    return {
+      x: event.pageX,
+      y: event.pageY
+    };
+  } 
+
   domIndexOf(element) {
-    let parent = angular.element(element.parent());
-    return Array.prototype.indexOf.call(parent.children(), element[0]);
+    element = element[0] || element;
+    let parent = angular.element(element.parentNode);
+    return Array.prototype.indexOf.call(parent.children(), element);
+  }
+
+  // Source: https://github.com/angular-ui/bootstrap/blob/master/src/position/position.js
+  offset(element) {
+    let elem = element[0] || element;
+
+    var elemBCR = elem.getBoundingClientRect();
+    return {
+        width: Math.round(angular.isNumber(elemBCR.width) ? elemBCR.width : elem.offsetWidth),
+        height: Math.round(angular.isNumber(elemBCR.height) ? elemBCR.height : elem.offsetHeight),
+        top: Math.round(elemBCR.top + (this.$window.pageYOffset || this.$document[0].documentElement.scrollTop)),
+        left: Math.round(elemBCR.left + (this.$window.pageXOffset || this.$document[0].documentElement.scrollLeft))
+    };
   }
 
   isDropWithinElmContainer(event, elm) {
@@ -96,25 +160,4 @@ export class DragAndDropService {
       return false;
     }
   }
-
-  getDropPoint(event) {
-    return {
-      x: event.pageX,
-      y: event.pageY
-    };
-  } 
-
-  // Source: https://github.com/angular-ui/bootstrap/blob/master/src/position/position.js
-  offset($element) {
-    let elem = $element[0] || $element;
-
-    var elemBCR = elem.getBoundingClientRect();
-    return {
-        width: Math.round(angular.isNumber(elemBCR.width) ? elemBCR.width : elem.offsetWidth),
-        height: Math.round(angular.isNumber(elemBCR.height) ? elemBCR.height : elem.offsetHeight),
-        top: Math.round(elemBCR.top + (this.$window.pageYOffset || this.$document[0].documentElement.scrollTop)),
-        left: Math.round(elemBCR.left + (this.$window.pageXOffset || this.$document[0].documentElement.scrollLeft))
-    };
-  }
-
 }

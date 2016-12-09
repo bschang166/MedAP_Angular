@@ -55,7 +55,7 @@ section.library-books {
   padding: 0px;
 }
 
-.draggable-active .library-bookList-book {
+.library-bookList .med-dnd-drag-active {
   opacity: 0.2;
 }
 

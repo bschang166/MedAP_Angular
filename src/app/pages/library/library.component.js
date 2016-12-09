@@ -92,17 +92,7 @@ class LibraryController {
     this.loadBooks();
   }
 
-  onDropBook(event, data) {
-    let dropIndex = data.dropIndex;
-    let droppedBook = data.model[data.dragIndex];
-
-    let dragIndex = this.filteredBooks.indexOf(droppedBook);
-    if (dragIndex > -1) {
-      // remove existing book first
-      this.filteredBooks.splice(dragIndex, 1);
-    }
-    this.filteredBooks.splice(dropIndex, 0, droppedBook);
-
+  onDropBook(event) {
     this.sortBy = '';
   }
 

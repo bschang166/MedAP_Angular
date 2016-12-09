@@ -20,7 +20,7 @@
     </section>
 
     <section class="library-books">
-      <ul class="library-bookList" med-on-drop="$ctrl.onDropBook($event, $data)" med-draggable-model="$ctrl.filteredBooks">
+      <ul class="library-bookList" med-dnd-model="$ctrl.filteredBooks" med-dnd-type="move" med-dnd-on-drop="$ctrl.onDropBook($event)">
         <li ng-repeat="book in $ctrl.filteredBooks track by $index">
           <div class="library-bookList-book">
             <h3> {{ book.title }} </h3>
