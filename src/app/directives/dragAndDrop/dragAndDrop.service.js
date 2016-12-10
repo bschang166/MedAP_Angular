@@ -63,7 +63,7 @@ export class DragAndDropService {
     let target = angular.element(targetElm);
     if (this.dndType === 'move') {
       // insert placeholder element for if drag target dom position need to be reverted after later move
-      this.placeholderElm = this.$window.document.createComment('');
+      this.placeholderElm = this.$window.document.createComment('dnd-placeholder');
       target.after(this.placeholderElm);
       this.dragTarget = target[0];
     } else {

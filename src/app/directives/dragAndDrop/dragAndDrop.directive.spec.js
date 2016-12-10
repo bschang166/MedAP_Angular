@@ -24,15 +24,16 @@ describe('DragAndDrop directive', () => {
         { name: '2' },
         { name: '3' },
       ];
+      scope.dndType = 'move';
       element = $compile(`
-        <ul med-dnd-model="items" med-dnd-type="dndType" med-dnd-on-drop="onDrop($event)">
+        <ul med-dnd-model="items" med-dnd-type="{{dndType}}" med-dnd-on-drop="onDrop($event)">
           <li ng-repeat="item in items">
             <div> {{item.name}} </div>
           </li>
         </ul>
       `)(scope);
 
-      scope.$digest();
+      scope.$apply();
     }));
 
     it('should add draggable attribute to only direct children', () => {
@@ -48,88 +49,103 @@ describe('DragAndDrop directive', () => {
       scope.items.splice(0, 1);
       expect(element.find('li').length).toEqual(length);
       scope.items = [];
-      scope.$digest();
+      scope.$apply();
       expect(element.find('li').length).toEqual(scope.items.length);
     });
 
-    // describe('drag and drop', () => {
-    //   let testBooks;
-    //   let target = newBook('title', 'author', 'date');
-    //   beforeEach(() => {
-    //     testBooks = [newBook(), newBook(), newBook()];
-    //   });
+    it('should on dragstart create a placeholder node after current dragged element', () => {
+      let dragElm = element.find('li').eq(0);
+      triggerEvent(dragElm, 'dragstart');
+      expect(dragElm[0].nextSibling.nodeValue).toContain('dnd-placeholder');
+    });
 
-    //   it('should move book from top to bottom', () => {
-    //     let books = [
-    //       target,
-    //       ...testBooks,
-    //     ];
-    //     ctrl.filteredBooks = books;
+    it('should on dragover move dragged element to be before the dragover node', () => {
+      let itemElms = element.find('li');
+      let dragElm = itemElms.eq(0);
+      let dropElm = itemElms.eq(1);
 
-    //     ctrl.onDropBook({}, {model: books, dragIndex: 0,dropIndex: books.length - 1});
+      triggerEvent(dragElm, 'dragstart');
+      triggerEvent(dropElm, 'dragover', {pageY: dropElm.offset().top - 1});
+      
+      expect(Array.prototype.indexOf.call(element.children(), dragElm[0])).toEqual(0);
+    });
 
-    //     let expected = [
-    //       ...testBooks,
-    //       target,
-    //     ];
+    it('should on dragover move dragged element to be after the dragover node', () => {
+      let itemElms = element.find('li');
+      let dragElm = itemElms.eq(0);
+      let dropElm = itemElms.eq(1);
 
-    //     expect(ctrl.filteredBooks).toEqual(expected);
-    //   });
+      triggerEvent(dragElm, 'dragstart');
+      triggerEvent(dropElm, 'dragover', {pageY: dropElm.offset().top + 1});
 
-    //   it('should move book from bottom to top', () => {
-    //     let books = [
-    //       ...testBooks,
-    //       target,
-    //     ];
-    //     ctrl.filteredBooks = books;
+      expect(Array.prototype.indexOf.call(element.children(), dragElm[0])).toEqual(1);
+    });
 
-    //     ctrl.onDropBook({}, {model: books, dragIndex: books.length - 1, dropIndex: 0});
+    it('should on dragend call endDrag()', () => {
+      spyOn(dragAndDropService, 'endDrag');
+      triggerEvent(element.find('li').eq(0), 'dragend');
+      expect(dragAndDropService.endDrag).toHaveBeenCalled();
+    });
 
-    //     let expected = [
-    //       target,
-    //       ...testBooks,
-    //     ];
-    //     expect(ctrl.filteredBooks).toEqual(expected);
-    //   });
+    it('should on drop move dragged model to drop model at drop index', () => {
+      let name = scope.items[0].name;
 
+      let itemElms = element.find('li');
+      let dragElm = itemElms.eq(0);
+      let dropElm = itemElms.eq(1);
 
-    //   it('should move book from middle to top', () => {
-    //     let books = [
-    //       ...testBooks,
-    //       target,
-    //       ...testBooks,
-    //     ];
-    //     ctrl.filteredBooks = books;
+      triggerEvent(dragElm, 'dragstart');
+      triggerEvent(dropElm, 'dragover');
+      triggerEvent(dropElm, 'drop');
+      triggerEvent(dragElm, 'dragend');
 
-    //     ctrl.onDropBook({}, {model: books, dragIndex: testBooks.length, dropIndex: 0});
+      expect(scope.items[1].name).toEqual(name);
+    });
 
-    //     let expected = [
-    //       target,
-    //       ...testBooks,
-    //       ...testBooks,
-    //     ];
-    //     expect(ctrl.filteredBooks).toEqual(expected);
-    //   });
+    it('should on drop copy dragged model to drop model at drop index', () => {
+      scope.dndType = 'copy';
+      scope.$apply();
 
-    //   it('should move book from middle to bottom', () => {
-    //     let books = [
-    //       ...testBooks,
-    //       target,
-    //       ...testBooks,
-    //     ];
-    //     ctrl.filteredBooks = books;
+      let itemElms = element.find('li');
+      let dragElm = itemElms.eq(0);
+      let dropElm = itemElms.eq(1);
 
-    //     ctrl.onDropBook({}, {model: books, dragIndex: testBooks.length, dropIndex: books.length - 1});
+      triggerEvent(dragElm, 'dragstart');
+      triggerEvent(dragElm, 'dragover');
+      triggerEvent(dropElm, 'drop');
+      triggerEvent(dragElm, 'dragend');
 
-    //     let expected = [
-    //       ...testBooks,
-    //       ...testBooks,
-    //       target,
-    //     ];
-    //     expect(ctrl.filteredBooks).toEqual(expected);
-    //   });
+      expect(scope.items[0].name).toEqual(scope.items[1].name);
+    });
 
-    // });
+    it('should on dragend move back dragged element to its original dom position', () => {
+      let itemElms = element.find('li');
+      let dragElm = itemElms.eq(0);
+      let dropElm = itemElms.eq(1);
+
+      triggerEvent(dragElm, 'dragstart');
+      triggerEvent(dropElm, 'dragover');
+      triggerEvent(dragElm, 'dragend');
+
+      expect(Array.prototype.indexOf.call(element.children(), dragElm[0])).toEqual(0);
+    });
+
+    function triggerEvent(element, eventType, eventOpts) {
+      let event = createEvent(eventType, eventOpts);
+      element.trigger(event);
+      scope.$apply();
+    }
+
+    function createEvent(type, opts) {
+      let event = Object.assign(
+        $.Event(type),
+        opts
+      );
+      event.dataTransfer = {};
+      event.dataTransfer.getData = function() { return this._dataTransfer; }
+      event.dataTransfer.setData = function(data) { this._dataTransfer = data }
+      return event;
+    }
 
   });
 

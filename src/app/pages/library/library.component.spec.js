@@ -4,7 +4,29 @@ import { LibraryModule } from './library.module';
 
 describe('Library component', () => {
 
-  beforeEach(angular.mock.module(LibraryModule));
+  let addBookFormSpy = componentSpyOn('addBookForm');
+  beforeEach(angular.mock.module(LibraryModule, addBookFormSpy));
+
+  function componentSpyOn(name) {
+    function componentSpy($provide) {
+      componentSpy.bindings = [];
+   
+      $provide.decorator(name + 'Directive', ($delegate) => {
+        let component = $delegate[0];
+   
+        component.template = '';
+        component.controller = class {
+          constructor() {
+            componentSpy.bindings.push(this);
+          }
+        };
+   
+        return $delegate;
+      });
+    }
+
+    return componentSpy;
+  }
 
   let LibraryService;
 // ---------- Unit Tests -------------------------------------------------------
@@ -14,16 +36,33 @@ describe('Library component', () => {
     let ctrl;
     let deferred;
 
-    beforeEach(inject(($rootScope, _$q_, $compile, _LibraryService_) => {
-      deferred = _$q_.defer();
+    let $q;
+    beforeEach(inject(($rootScope, _$q_, $compile, _LibraryService_, _$componentController_) => {
+      $q = _$q_;
 
       LibraryService = _LibraryService_;
+      deferred = _$q_.defer();
       spyOn(LibraryService, 'retrieveBooks').and.returnValue(deferred.promise);
 
       scope = $rootScope.$new();
       element = $compile('<library></library>')(scope);
       ctrl = element.controller('library');
+      scope.$apply();
     }));
+
+    it('should call service to add then load book', () => {
+      LibraryService.retrieveBooks.calls.reset();
+      let addBookDeferred = $q.defer();
+      spyOn(LibraryService, 'addBook').and.returnValue(addBookDeferred.promise);
+      addBookDeferred.resolve();
+
+      let book = newBook('title', 'author', new Date(2016, 11, 12));
+      addBookFormSpy.bindings[0].onSubmit({$event: {book}});
+      scope.$apply();
+
+      expect(LibraryService.addBook).toHaveBeenCalledWith(book);
+      expect(LibraryService.retrieveBooks.calls.count()).toEqual(1);
+    });
 
   });
 

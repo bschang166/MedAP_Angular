@@ -1,0 +1,44 @@
+<form name="addBookForm" class="addBookForm form-horizontal" novalidate
+   ng-model-options="{ updateOn: 'blur' }">
+
+  <div class="addBookForm-formGroup form-group"
+    ng-class="{
+      'has-success': addBookForm.title.$dirty && addBookForm.title.$valid,
+      'has-error': (addBookForm.title.$dirty || addBookForm.$submitted) && addBookForm.title.$invalid
+    }">
+    
+    <label>Title: </label>
+    <input type="text" name="title" class="form-control" ng-model="$ctrl.bookToAdd.title" required/>
+    <span class="help-block" ng-if="(addBookForm.title.$dirty || addBookForm.$submitted) && addBookForm.title.$invalid">
+      Please provide a book title.
+    </span>
+  </div>
+
+  <div class="addBookForm-formGroup form-group"
+    ng-class="{
+      'has-success': addBookForm.author.$dirty && addBookForm.author.$valid,
+      'has-error': (addBookForm.author.$dirty || addBookForm.$submitted) && addBookForm.author.$invalid
+    }">
+    
+    <label>Author: </label>
+    <input type="text" name="author" class="form-control" ng-model="$ctrl.bookToAdd.author" required/>
+    <span class="help-block" ng-if="(addBookForm.author.$dirty || addBookForm.$submitted) && addBookForm.author.$invalid">
+      Please provide a book author.
+    </span>
+  </div>
+
+  <div class="addBookForm-formGroup form-group"
+    ng-class="{
+      'has-success': addBookForm.pubDate.$dirty && addBookForm.pubDate.$valid,
+      'has-error': addBookForm.pubDate.$dirty && addBookForm.pubDate.$invalid
+    }">
+    
+    <label>Published Date: </label>
+    <input type="date" name="pubDate" class="form-control" placeholder="yyyy-MM-dd" ng-model="$ctrl.bookToAdd.pubDate" required/>
+    <span class="help-block" ng-if="(addBookForm.pubDate.$dirty || addBookForm.$submitted) && addBookForm.pubDate.$invalid">
+      Please provide a published date.
+    </span>
+  </div>
+
+  <button class="btn btn-primary" ng-click="addBookForm.$valid && $ctrl.addBook($ctrl.bookToAdd)">Add Book</button>
+</form>

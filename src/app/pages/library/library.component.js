@@ -30,9 +30,7 @@ class LibraryController {
 
   $onInit() {
     this.sortBy = this.bookSortAttrs[0].name;
-
     this.searchResults = [];
-    this.bookToAdd = {};
 
     this.loadBooks();
   }
@@ -76,15 +74,10 @@ class LibraryController {
       });
   }
 
-  addBook(book) {
+  addBook(event) {
+    let book = event.book;
     this._service.addBook(book).then(() => {
       this.loadBooks();
-
-      // reset form
-      this.bookToAdd = {};
-      this.$scope.addBookForm.$setPristine();
-      this.$scope.addBookForm.$setUntouched();
-      this.$scope.addBookForm.$submitted = false;
     });
   }
 

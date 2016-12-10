@@ -18,6 +18,8 @@ module.exports = function karmaConfig (config) {
     ],
 
     files: [
+      // include jquery for now for test with event bubbling
+      'node_modules/jquery/dist/jquery.js',
       // Grab all files in the app folder that contain .spec.
       'src/tests.webpack.js'
     ],
